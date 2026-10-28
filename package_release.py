@@ -9,7 +9,7 @@ README_CONTENT = """============================================================
 
 A fast, private, offline document signing application.
 Upload documents, craft stylish electronic signatures, position them visually,
-and download the signed PDF - without any data ever leaving your machine.
+and download the signed PDF or Word document - without data leaving your machine.
 
 --------------------------------------------------------------------------------
 1. QUICK START
@@ -20,7 +20,8 @@ and download the signed PDF - without any data ever leaving your machine.
 3. Choose or drag-and-drop a document (PDF, Word DOCX, or images).
 4. Enter your name, select your preferred signature style & ink color.
 5. Click on any page to place your signature. Drag or resize as needed.
-6. Click "Download signed PDF" to save your signed document.
+6. Download the signed PDF, or choose "Download signed Word" when Microsoft
+   Word is installed.
 7. When finished, click "Stop & Exit" on the companion window.
 
 --------------------------------------------------------------------------------
@@ -61,8 +62,9 @@ You can also launch Local Document Signer from Command Prompt or PowerShell:
 --------------------------------------------------------------------------------
 * Operating System: Windows 10 or Windows 11 (64-bit).
 * Dependencies: None! Standalone single executable (Python is not required).
-* DOCX Support: Microsoft Word installed on Windows is required for automatic
-  DOCX conversion. If Word is not installed, export DOCX to PDF first.
+* DOCX Support: Microsoft Word installed on Windows is required to open DOCX
+  files and to download signed Word documents. If Word is not installed, export
+  DOCX to PDF first; PDF downloads remain available.
 
 ================================================================================
 """

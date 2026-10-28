@@ -58,6 +58,9 @@
       <div class="export-area">
         <div class="export-summary"><span>Placed signatures</span><strong id="signature-count">0</strong></div>
         <button id="download" class="primary" disabled><span class="icon" aria-hidden="true">download</span><span id="download-label">Download signed PDF</span></button>
+        {% if word_available %}
+        <button id="download-word" class="secondary" disabled><span class="icon" aria-hidden="true">description</span><span id="download-word-label">Download signed Word</span></button>
+        {% endif %}
       </div>
     </aside>
 

@@ -1,11 +1,12 @@
 import io
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 import zipfile
 
 import fitz
 
-from word_conversion import convert_docx, word_available
+from word_conversion import convert_docx, convert_pdf_to_docx, word_available
 
 
 def make_docx():
@@ -55,6 +56,21 @@ class WordConversionTests(unittest.TestCase):
         with patch("word_conversion.word_available", return_value=False):
             with self.assertRaisesRegex(ValueError, "Export the document to PDF"):
                 convert_docx(make_docx())
+
+    def test_pdf_to_docx_uses_word_conversion_subprocess(self):
+        def create_docx(command, **kwargs):
+            Path(command[-3]).write_bytes(b"converted Word document")
+
+        with (
+            patch("word_conversion.word_available", return_value=True),
+            patch("word_conversion.subprocess.run", side_effect=create_docx) as run,
+        ):
+            result = convert_pdf_to_docx(b"signed PDF")
+
+        self.assertEqual(result, b"converted Word document")
+        command = run.call_args.args[0]
+        self.assertEqual(command[-1], "docx")
+        self.assertTrue(command[-3].endswith(".docx"))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Local Document Signer
 
-Upload a document, enter a name, place a transparent signature, and download a signed PDF. Originals are not modified, and processing stays on your computer.
+Upload a document, enter a name, place a transparent signature, and download a signed PDF or Word document. Originals are not modified, and processing stays on your computer.
 
 ## Run
 
@@ -17,7 +17,7 @@ Open http://127.0.0.1:5050. For a different port, run `python app.py --port 5051
 2. Enter the full name and select a style and ink color.
 3. Choose a page, then click the signing location. The pen tool adds further signatures.
 4. Drag signatures to move them. Select a signature to change its width or delete it. Undo restores placement changes.
-5. Download the signed PDF.
+5. Download the signed PDF, or choose the signed Word option when Microsoft Word is available.
 
 The name, style, and ink color apply to all signatures in the current document. Width can be adjusted individually. Tab focuses controls; Enter on a focused page places a signature in its center; arrow keys move a focused signature; Delete removes the selected signature.
 
@@ -29,7 +29,7 @@ The name, style, and ink color apply to all signatures in the current document. 
 - Other formats, including legacy DOC files, must be exported to PDF first.
 - Maximum upload and converted PDF size: 25 MB. Maximum signatures per document: 50.
 
-Unlock password-protected PDFs before uploading. Macro-enabled Word documents are not supported. Without Microsoft Word, export DOCX files to PDF first. Review any Word-to-PDF layout changes before downloading.
+Unlock password-protected PDFs before uploading. Macro-enabled Word documents are not supported. Without Microsoft Word, export DOCX files to PDF first; the Word download option is available only when Microsoft Word is installed. Word may adjust layout when converting the signed PDF back to DOCX, so review the Word document before sharing it.
 
 Accented names are supported. Windows fonts provide the signature styles; other scripts use fallback fonts and text shaping where needed. The preview shows the appearance embedded in the output.
 
