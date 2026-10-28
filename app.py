@@ -13,7 +13,7 @@ from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
 from sign_documents import create_signature, sign_pdf
-from word_conversion import convert_docx, word_available
+from word_conversion import convert_docx, convert_pdf_to_docx, word_available
 
 
 def get_bundle_dir():
@@ -100,7 +100,7 @@ def check_pdf(document):
 
 @app.get("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", word_available=word_available())
 
 
 @app.get("/api/capabilities")
@@ -167,6 +167,9 @@ def preview_signature():
 @app.post("/api/sign")
 def download_signed():
     contents, filename = uploaded_file(pdf_only=True)
+    output_format = request.form.get("format", "pdf")
+    if output_format not in {"pdf", "docx"}:
+        raise ValueError("Choose PDF or Word as the download format.")
     try:
         placements = json.loads(request.form.get("placements", "[]"))
     except json.JSONDecodeError as error:
@@ -178,11 +181,20 @@ def download_signed():
         request.form.get("style", "handwritten"),
         request.form.get("color", "black"),
     )
+    if output_format == "docx":
+        signed = convert_pdf_to_docx(signed)
+        if len(signed) > MAX_FILE_SIZE:
+            raise ValueError("The converted Word document exceeds 25 MB.")
+    mimetype = (
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        if output_format == "docx"
+        else "application/pdf"
+    )
     return send_file(
         io.BytesIO(signed),
-        mimetype="application/pdf",
+        mimetype=mimetype,
         as_attachment=True,
-        download_name=f"{Path(filename).stem}_signed.pdf",
+        download_name=f"{Path(filename).stem}_signed.{output_format}",
     )
 
 

@@ -54,6 +54,41 @@ class UploadTests(unittest.TestCase):
             self.assertIn(name, signed[0].get_text())
             self.assertIn("Original document", signed[0].get_text())
 
+    def test_signed_word_download_converts_signed_pdf(self):
+        name = "Lejla O'Connor"
+        with patch("app.convert_pdf_to_docx", return_value=b"Word document") as convert:
+            response = self.post_document(
+                "/api/sign",
+                name=name,
+                format="docx",
+                placements=json.dumps([{"page": 0, "x": 0.1, "y": 0.5, "width": 0.4}]),
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        self.assertIn("example_signed.docx", response.headers["Content-Disposition"])
+        self.assertEqual(response.data, b"Word document")
+        with fitz.open(stream=convert.call_args.args[0], filetype="pdf") as signed:
+            self.assertIn(name, signed[0].get_text())
+
+    def test_unsupported_download_format_is_rejected(self):
+        response = self.post_document(
+            "/api/sign",
+            format="txt",
+            name="Test Signer",
+            placements=json.dumps([{"page": 0, "x": 0.1, "y": 0.5, "width": 0.4}]),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("PDF or Word", response.json["error"])
+
+    def test_word_download_option_requires_word(self):
+        with patch("app.word_available", return_value=True):
+            response = self.client.get("/")
+        self.assertIn(b'id="download-word"', response.data)
+
+        with patch("app.word_available", return_value=False):
+            response = self.client.get("/")
+        self.assertNotIn(b'id="download-word"', response.data)
+
     def test_invalid_uploads_and_cross_origin_are_rejected(self):
         self.assertEqual(self.post_document("/api/document", b"bad PDF").status_code, 400)
         self.assertEqual(self.post_document("/api/document", b"text", "note.txt").status_code, 400)

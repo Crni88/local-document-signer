@@ -55,6 +55,11 @@ function updateControls() {
   element("delete-signature").disabled = !ready || !selectedPlacement();
   element("download").disabled = !ready || !state.signature || !state.placements.length;
   element("download-label").textContent = state.downloading ? "Preparing PDF..." : "Download signed PDF";
+  const wordDownload = element("download-word");
+  if (wordDownload) {
+    wordDownload.disabled = !ready || !state.signature || !state.placements.length;
+    element("download-word-label").textContent = state.downloading ? "Preparing Word..." : "Download signed Word";
+  }
   element("signature-count").textContent = state.placements.length;
   element("zoom-in").disabled = !ready || state.zoom >= 2.5;
   element("zoom-out").disabled = !ready || state.zoom <= .5;
@@ -315,7 +320,7 @@ function deleteSelected() {
   updateControls();
 }
 
-async function downloadDocument() {
+async function downloadDocument(format = "pdf") {
   if (!state.file || !state.signature || !state.placements.length || state.downloading) return;
   clearError();
   state.downloading = true;
@@ -324,17 +329,18 @@ async function downloadDocument() {
     const form = documentForm();
     for (const [key, value] of Object.entries(settings())) form.append(key, value);
     form.append("placements", JSON.stringify(state.placements));
+    form.append("format", format);
     const response = await api("/api/sign", form);
     const url = URL.createObjectURL(await response.blob());
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `${state.originalName.replace(/\.[^.]+$/, "")}_signed.pdf`;
+    anchor.download = `${state.originalName.replace(/\.[^.]+$/, "")}_signed.${format}`;
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
     state.dirty = false;
-    setStatus("Signed PDF downloaded");
+    setStatus(`Signed ${format === "docx" ? "Word document" : "PDF"} downloaded`);
   } catch (error) { showError(error.message); }
   finally { state.downloading = false; updateControls(); }
 }
@@ -390,7 +396,8 @@ element("undo").onclick = () => {
   renderPlacements();
   updateControls();
 };
-element("download").onclick = downloadDocument;
+element("download").onclick = () => downloadDocument("pdf");
+if (element("download-word")) element("download-word").onclick = () => downloadDocument("docx");
 for (const [id, change] of [["zoom-in", .25], ["zoom-out", -.25], ["fit-page", 0]]) {
   element(id).onclick = () => { state.zoom = change ? Math.max(.5, Math.min(2.5, state.zoom + change)) : 1; fitPage(); updateControls(); };
 }
